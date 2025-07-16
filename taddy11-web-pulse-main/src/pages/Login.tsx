@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Logo from "@/components/ui/logo";
 
 const Login = () => {
   const { toast } = useToast();
@@ -58,8 +59,8 @@ const Login = () => {
       <div className="max-w-md mx-auto px-4 py-20">
         <Card className="shadow-tech border-purple-200">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
+            <div className="mb-4">
+              <Logo size="lg" showText={false} className="justify-center" />
             </div>
             <CardTitle className="text-2xl text-purple-800">Welcome Back</CardTitle>
             <CardDescription>Sign in to your Sisuni Tech account</CardDescription>

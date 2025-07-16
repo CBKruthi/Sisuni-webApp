@@ -77,19 +77,14 @@ router.post('/general', upload.single('resume'), async (req, res) => {
 });
 
 // Get all applications (for admin)
-// routes/applications.js
-router.get('/', async (req, res) => {
+router.get('/all', async (req, res) => {
   try {
-    const { email } = req.query;
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email is required' });
-    }
-
-    const applications = await Application.find({ email });
+    // Admin route - fetch ALL applications without any filter
+    const applications = await Application.find({}).sort({ createdAt: -1 });
     res.json({ success: true, applications });
   } catch (error) {
-    console.error('❌ Error fetching applications:', error);
-    res.status(500).json({ success: false, message: 'Error fetching applications' });
+    console.error('❌ Error fetching all applications:', error);
+    res.status(500).json({ success: false, message: 'Error fetching all applications' });
   }
 });
 

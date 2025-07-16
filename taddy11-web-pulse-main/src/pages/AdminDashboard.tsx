@@ -110,7 +110,9 @@ const AdminDashboard = () => {
 
   const fetchApplications = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/applications`);
+      // Admin should fetch ALL applications without any email filter
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/applications/all`);
+      
       if (response.data.success) {
         setApplications(response.data.applications);
       }
@@ -600,18 +602,37 @@ const AdminDashboard = () => {
           <TabsContent value="jobs" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-purple-800">Job Positions</h2>
-              <Dialog open={isJobDialogOpen} onOpenChange={setIsJobDialogOpen}>
+              <Dialog open={isJobDialogOpen} onOpenChange={(value) => {
+                setIsJobDialogOpen(value);
+                if (!value) {
+                  setEditingJob(null);
+                  // Reset form when closing
+                  setNewJob({
+                    title: "",
+                    department: "",
+                    location: "",
+                    type: "full-time",
+                    description: "",
+                    requirements: [""],
+                    responsibilities: [""],
+                    salary: "",
+                    experience: "",
+                    benefits: [""],
+                    isActive: true
+                  });
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
                     <Plus className="h-4 w-4 mr-2" />
                     Add New Job
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Create New Job Position</DialogTitle>
+                    <DialogTitle>{editingJob ? 'Edit Job Position' : 'Create New Job Position'}</DialogTitle>
                     <DialogDescription>
-                      Add a new job opening to attract candidates
+                      {editingJob ? 'Update job details and requirements' : 'Add a new job opening to attract candidates'}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
@@ -620,8 +641,14 @@ const AdminDashboard = () => {
                         <Label htmlFor="title">Job Title</Label>
                         <Input
                           id="title"
-                          value={newJob.title}
-                          onChange={(e) => setNewJob(prev => ({ ...prev, title: e.target.value }))}
+                          value={editingJob ? editingJob.title : newJob.title}
+                          onChange={(e) => {
+                            if (editingJob) {
+                              setEditingJob(prev => prev ? ({ ...prev, title: e.target.value }) : null);
+                            } else {
+                              setNewJob(prev => ({ ...prev, title: e.target.value }));
+                            }
+                          }}
                           placeholder="e.g. Senior Developer"
                         />
                       </div>
@@ -629,8 +656,14 @@ const AdminDashboard = () => {
                         <Label htmlFor="department">Department</Label>
                         <Input
                           id="department"
-                          value={newJob.department}
-                          onChange={(e) => setNewJob(prev => ({ ...prev, department: e.target.value }))}
+                          value={editingJob ? editingJob.department : newJob.department}
+                          onChange={(e) => {
+                            if (editingJob) {
+                              setEditingJob(prev => prev ? ({ ...prev, department: e.target.value }) : null);
+                            } else {
+                              setNewJob(prev => ({ ...prev, department: e.target.value }));
+                            }
+                          }}
                           placeholder="e.g. Engineering"
                         />
                       </div>
@@ -640,14 +673,29 @@ const AdminDashboard = () => {
                         <Label htmlFor="location">Location</Label>
                         <Input
                           id="location"
-                          value={newJob.location}
-                          onChange={(e) => setNewJob(prev => ({ ...prev, location: e.target.value }))}
+                          value={editingJob ? editingJob.location : newJob.location}
+                          onChange={(e) => {
+                            if (editingJob) {
+                              setEditingJob(prev => prev ? ({ ...prev, location: e.target.value }) : null);
+                            } else {
+                              setNewJob(prev => ({ ...prev, location: e.target.value }));
+                            }
+                          }}
                           placeholder="e.g. Remote, Hybrid"
                         />
                       </div>
                       <div>
                         <Label htmlFor="type">Job Type</Label>
-                        <Select value={newJob.type} onValueChange={(value) => setNewJob(prev => ({ ...prev, type: value }))}>
+                        <Select 
+                          value={editingJob ? editingJob.type : newJob.type} 
+                          onValueChange={(value) => {
+                            if (editingJob) {
+                              setEditingJob(prev => prev ? ({ ...prev, type: value }) : null);
+                            } else {
+                              setNewJob(prev => ({ ...prev, type: value }));
+                            }
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -664,8 +712,14 @@ const AdminDashboard = () => {
                       <Label htmlFor="salary">Salary Range</Label>
                       <Input
                         id="salary"
-                        value={newJob.salary}
-                        onChange={(e) => setNewJob(prev => ({ ...prev, salary: e.target.value }))}
+                        value={editingJob ? editingJob.salary : newJob.salary}
+                        onChange={(e) => {
+                          if (editingJob) {
+                            setEditingJob(prev => prev ? ({ ...prev, salary: e.target.value }) : null);
+                          } else {
+                            setNewJob(prev => ({ ...prev, salary: e.target.value }));
+                          }
+                        }}
                         placeholder="e.g. ₹10-15 LPA"
                       />
                     </div>
@@ -673,8 +727,14 @@ const AdminDashboard = () => {
                       <Label htmlFor="experience">Experience Required</Label>
                       <Input
                         id="experience"
-                        value={newJob.experience}
-                        onChange={(e) => setNewJob(prev => ({ ...prev, experience: e.target.value }))}
+                        value={editingJob ? editingJob.experience : newJob.experience}
+                        onChange={(e) => {
+                          if (editingJob) {
+                            setEditingJob(prev => prev ? ({ ...prev, experience: e.target.value }) : null);
+                          } else {
+                            setNewJob(prev => ({ ...prev, experience: e.target.value }));
+                          }
+                        }}
                         placeholder="e.g. 2-4 years"
                       />
                     </div>
@@ -682,22 +742,34 @@ const AdminDashboard = () => {
                       <Label htmlFor="description">Job Description</Label>
                       <Textarea
                         id="description"
-                        value={newJob.description}
-                        onChange={(e) => setNewJob(prev => ({ ...prev, description: e.target.value }))}
+                        value={editingJob ? editingJob.description : newJob.description}
+                        onChange={(e) => {
+                          if (editingJob) {
+                            setEditingJob(prev => prev ? ({ ...prev, description: e.target.value }) : null);
+                          } else {
+                            setNewJob(prev => ({ ...prev, description: e.target.value }));
+                          }
+                        }}
                         placeholder="Describe the role and responsibilities..."
                         rows={4}
                       />
                     </div>
                     <div>
                       <Label>Requirements</Label>
-                      {newJob.requirements.map((req, index) => (
+                      {(editingJob ? editingJob.requirements : newJob.requirements).map((req, index) => (
                         <div key={index} className="flex gap-2 mb-2">
                           <Input
                             value={req}
                             onChange={(e) => {
-                              const newReqs = [...newJob.requirements];
-                              newReqs[index] = e.target.value;
-                              setNewJob(prev => ({ ...prev, requirements: newReqs }));
+                              if (editingJob) {
+                                const newReqs = [...editingJob.requirements];
+                                newReqs[index] = e.target.value;
+                                setEditingJob(prev => prev ? ({ ...prev, requirements: newReqs }) : null);
+                              } else {
+                                const newReqs = [...newJob.requirements];
+                                newReqs[index] = e.target.value;
+                                setNewJob(prev => ({ ...prev, requirements: newReqs }));
+                              }
                             }}
                             placeholder="Enter requirement"
                           />
@@ -706,8 +778,13 @@ const AdminDashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const newReqs = newJob.requirements.filter((_, i) => i !== index);
-                              setNewJob(prev => ({ ...prev, requirements: newReqs }));
+                              if (editingJob) {
+                                const newReqs = editingJob.requirements.filter((_, i) => i !== index);
+                                setEditingJob(prev => prev ? ({ ...prev, requirements: newReqs }) : null);
+                              } else {
+                                const newReqs = newJob.requirements.filter((_, i) => i !== index);
+                                setNewJob(prev => ({ ...prev, requirements: newReqs }));
+                              }
                             }}
                           >
                             Remove
@@ -718,21 +795,33 @@ const AdminDashboard = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setNewJob(prev => ({ ...prev, requirements: [...prev.requirements, ""] }))}
+                        onClick={() => {
+                          if (editingJob) {
+                            setEditingJob(prev => prev ? ({ ...prev, requirements: [...prev.requirements, ""] }) : null);
+                          } else {
+                            setNewJob(prev => ({ ...prev, requirements: [...prev.requirements, ""] }));
+                          }
+                        }}
                       >
                         Add Requirement
                       </Button>
                     </div>
                     <div>
                       <Label>Responsibilities</Label>
-                      {newJob.responsibilities.map((resp, index) => (
+                      {(editingJob ? editingJob.responsibilities : newJob.responsibilities).map((resp, index) => (
                         <div key={index} className="flex gap-2 mb-2">
                           <Input
                             value={resp}
                             onChange={(e) => {
-                              const newResps = [...newJob.responsibilities];
-                              newResps[index] = e.target.value;
-                              setNewJob(prev => ({ ...prev, responsibilities: newResps }));
+                              if (editingJob) {
+                                const newResps = [...editingJob.responsibilities];
+                                newResps[index] = e.target.value;
+                                setEditingJob(prev => prev ? ({ ...prev, responsibilities: newResps }) : null);
+                              } else {
+                                const newResps = [...newJob.responsibilities];
+                                newResps[index] = e.target.value;
+                                setNewJob(prev => ({ ...prev, responsibilities: newResps }));
+                              }
                             }}
                             placeholder="Enter responsibility"
                           />
@@ -741,8 +830,13 @@ const AdminDashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const newResps = newJob.responsibilities.filter((_, i) => i !== index);
-                              setNewJob(prev => ({ ...prev, responsibilities: newResps }));
+                              if (editingJob) {
+                                const newResps = editingJob.responsibilities.filter((_, i) => i !== index);
+                                setEditingJob(prev => prev ? ({ ...prev, responsibilities: newResps }) : null);
+                              } else {
+                                const newResps = newJob.responsibilities.filter((_, i) => i !== index);
+                                setNewJob(prev => ({ ...prev, responsibilities: newResps }));
+                              }
                             }}
                           >
                             Remove
@@ -753,21 +847,33 @@ const AdminDashboard = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setNewJob(prev => ({ ...prev, responsibilities: [...prev.responsibilities, ""] }))}
+                        onClick={() => {
+                          if (editingJob) {
+                            setEditingJob(prev => prev ? ({ ...prev, responsibilities: [...prev.responsibilities, ""] }) : null);
+                          } else {
+                            setNewJob(prev => ({ ...prev, responsibilities: [...prev.responsibilities, ""] }));
+                          }
+                        }}
                       >
                         Add Responsibility
                       </Button>
                     </div>
                     <div>
                       <Label>Benefits</Label>
-                      {newJob.benefits.map((benefit, index) => (
+                      {(editingJob ? editingJob.benefits : newJob.benefits).map((benefit, index) => (
                         <div key={index} className="flex gap-2 mb-2">
                           <Input
                             value={benefit}
                             onChange={(e) => {
-                              const newBenefits = [...newJob.benefits];
-                              newBenefits[index] = e.target.value;
-                              setNewJob(prev => ({ ...prev, benefits: newBenefits }));
+                              if (editingJob) {
+                                const newBenefits = [...editingJob.benefits];
+                                newBenefits[index] = e.target.value;
+                                setEditingJob(prev => prev ? ({ ...prev, benefits: newBenefits }) : null);
+                              } else {
+                                const newBenefits = [...newJob.benefits];
+                                newBenefits[index] = e.target.value;
+                                setNewJob(prev => ({ ...prev, benefits: newBenefits }));
+                              }
                             }}
                             placeholder="Enter benefit"
                           />
@@ -776,8 +882,13 @@ const AdminDashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const newBenefits = newJob.benefits.filter((_, i) => i !== index);
-                              setNewJob(prev => ({ ...prev, benefits: newBenefits }));
+                              if (editingJob) {
+                                const newBenefits = editingJob.benefits.filter((_, i) => i !== index);
+                                setEditingJob(prev => prev ? ({ ...prev, benefits: newBenefits }) : null);
+                              } else {
+                                const newBenefits = newJob.benefits.filter((_, i) => i !== index);
+                                setNewJob(prev => ({ ...prev, benefits: newBenefits }));
+                              }
                             }}
                           >
                             Remove
@@ -788,18 +899,39 @@ const AdminDashboard = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setNewJob(prev => ({ ...prev, benefits: [...prev.benefits, ""] }))}
+                        onClick={() => {
+                          if (editingJob) {
+                            setEditingJob(prev => prev ? ({ ...prev, benefits: [...prev.benefits, ""] }) : null);
+                          } else {
+                            setNewJob(prev => ({ ...prev, benefits: [...prev.benefits, ""] }));
+                          }
+                        }}
                       >
                         Add Benefit
                       </Button>
                     </div>
+                    {editingJob && (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="edit-active"
+                          checked={editingJob.isActive}
+                          onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, isActive: e.target.checked }) : null)}
+                          className="rounded"
+                        />
+                        <Label htmlFor="edit-active">Active Position</Label>
+                      </div>
+                    )}
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsJobDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleCreateJob} className="bg-gradient-to-r from-purple-600 to-blue-600">
-                      Create Job
+                    <Button 
+                      onClick={editingJob ? handleUpdateJob : handleCreateJob} 
+                      className="bg-gradient-to-r from-purple-600 to-blue-600"
+                    >
+                      {editingJob ? 'Update Job' : 'Create Job'}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -826,158 +958,16 @@ const AdminDashboard = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setEditingJob(job)}
+                              onClick={() => {
+                                setEditingJob(job);
+                                setIsJobDialogOpen(true);
+                              }}
                               className="border-purple-200 text-purple-600"
                             >
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Edit Job Position</DialogTitle>
-                              <DialogDescription>
-                                Update job details and requirements
-                              </DialogDescription>
-                            </DialogHeader>
-                            {editingJob && (
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label htmlFor="edit-title">Job Title</Label>
-                                    <Input
-                                      id="edit-title"
-                                      value={editingJob.title}
-                                      onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, title: e.target.value }) : null)}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-department">Department</Label>
-                                    <Input
-                                      id="edit-department"
-                                      value={editingJob.department}
-                                      onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, department: e.target.value }) : null)}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label htmlFor="edit-location">Location</Label>
-                                    <Input
-                                      id="edit-location"
-                                      value={editingJob.location}
-                                      onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, location: e.target.value }) : null)}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-type">Job Type</Label>
-                                    <Select 
-                                      value={editingJob.type} 
-                                      onValueChange={(value) => setEditingJob(prev => prev ? ({ ...prev, type: value }) : null)}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="full-time">Full Time</SelectItem>
-                                        <SelectItem value="part-time">Part Time</SelectItem>
-                                        <SelectItem value="contract">Contract</SelectItem>
-                                        <SelectItem value="internship">Internship</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label htmlFor="edit-experience">Experience Required</Label>
-                                    <Input
-                                      id="edit-experience"
-                                      value={editingJob.experience}
-                                      onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, experience: e.target.value }) : null)}
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-salary">Salary Range</Label>
-                                    <Input
-                                      id="edit-salary"
-                                      value={editingJob.salary}
-                                      onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, salary: e.target.value }) : null)}
-                                    />
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-description">Job Description</Label>
-                                  <Textarea
-                                    id="edit-description"
-                                    value={editingJob.description}
-                                    onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, description: e.target.value }) : null)}
-                                    rows={4}
-                                  />
-                                </div>
-                                <div>
-                                  <Label>Requirements</Label>
-                                  {editingJob.requirements.map((req, index) => (
-                                    <div key={index} className="flex gap-2 mb-2">
-                                      <Input
-                                        value={req}
-                                        onChange={(e) => {
-                                          if (editingJob) {
-                                            const newReqs = [...editingJob.requirements];
-                                            newReqs[index] = e.target.value;
-                                            setEditingJob(prev => prev ? ({ ...prev, requirements: newReqs }) : null);
-                                          }
-                                        }}
-                                        placeholder="Enter requirement"
-                                      />
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                          if (editingJob) {
-                                            const newReqs = editingJob.requirements.filter((_, i) => i !== index);
-                                            setEditingJob(prev => prev ? ({ ...prev, requirements: newReqs }) : null);
-                                          }
-                                        }}
-                                      >
-                                        Remove
-                                      </Button>
-                                    </div>
-                                  ))}
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      if (editingJob) {
-                                        setEditingJob(prev => prev ? ({ ...prev, requirements: [...prev.requirements, ""] }) : null);
-                                      }
-                                    }}
-                                  >
-                                    Add Requirement
-                                  </Button>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    id="edit-active"
-                                    checked={editingJob.isActive}
-                                    onChange={(e) => setEditingJob(prev => prev ? ({ ...prev, isActive: e.target.checked }) : null)}
-                                    className="rounded"
-                                  />
-                                  <Label htmlFor="edit-active">Active Position</Label>
-                                </div>
-                              </div>
-                            )}
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setEditingJob(null)}>
-                                Cancel
-                              </Button>
-                              <Button onClick={handleUpdateJob} className="bg-gradient-to-r from-purple-600 to-blue-600">
-                                Update Job
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
                         </Dialog>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
