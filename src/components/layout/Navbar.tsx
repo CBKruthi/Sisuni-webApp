@@ -6,6 +6,7 @@
  import { Menu, X, User, LogOut } from "lucide-react";
  import {
    DropdownMenu,
+ }
 @@ .. @@
            {/* Logo */}
 -          <Link to="/" className="flex items-center space-x-2">
