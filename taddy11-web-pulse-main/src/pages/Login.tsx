@@ -35,7 +35,7 @@ const Login = () => {
       localStorage.setItem('isLoggedIn', 'true');
       
       // Check if admin
-      if (formData.email === 'admin@sisuni.tech') {
+      if (formData.email === 'admin@sisuni.tech') {  // ← THIS LINE SETS ADMIN
         localStorage.setItem('isAdmin', 'true');
       }
       
